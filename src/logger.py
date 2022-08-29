@@ -17,7 +17,10 @@ class Logger(object):
         self.log.write(message)
 
     def print(self, message):
+        self.stop()
+        print(message)
         self.write(message)
+        self.start()
 
     def stop(self):
         sys.stdout = self.terminal

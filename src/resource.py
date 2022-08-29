@@ -74,16 +74,16 @@ class Resource:
         fs.close()
         return json.loads(data)
 
-    def loadTexture(self, source: str, size: int = 128):
+    def loadTexture(self, source: str, size: int = 128,rgba:bool = True):
         fpath = self.goto('textures', source)
         image = cv2.imread(fpath, cv2.IMREAD_UNCHANGED)
         h, w, c = image.shape
         origin = np.array([w, h])
-        scale = 128/origin
+        scale = size/origin
         scale.sort()
         dim = (origin * scale[1]).astype(int)
         image = cv2.resize(image, (dim[0], dim[1]),
                            interpolation=cv2.INTER_AREA)
-        image = cv2.cvtColor(image, cv2.COLOR_BGRA2RGBA)
+        if(rgba): image = cv2.cvtColor(image, cv2.COLOR_BGRA2RGBA)
         # cv2.imshow(source,image)
         return Texture(source,image,origin)

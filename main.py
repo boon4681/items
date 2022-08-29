@@ -30,7 +30,7 @@ def setup(size):
     glShadeModel(GL_FLAT)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    scale = 1
+    scale = 1.225
     focus = 5
     glOrtho(-1.0 / scale, 1.0 / scale, -1.0 / scale,
             1.0 / scale, -2.0/scale, 1.0/scale*focus)
@@ -43,11 +43,14 @@ def setup(size):
     glViewport(0, 0, size, size)
 
 res = Resource('./resource/1.18.2/assets/minecraft')
-scene = Scene(64, setup)
+size = 64
+scene = Scene(size, setup)
 scene.clear()
 
 items = list(pathlib.Path().glob("./resource/1.18.2/assets/minecraft/models/item/*.json"))
+b = 0
 i = 0
+fail = 0
 with alive_bar(len(items), force_tty=True) as bar:
     logger = Logger(bar)
     logger.start()
@@ -62,11 +65,26 @@ with alive_bar(len(items), force_tty=True) as bar:
                 block = Block(scene,res, j["parent"])
                 block.render()
                 cv2.imwrite(f'./generate/{item.name.replace(".json","")}.png', scene.readScene())
-                i+=1
+                b+=1
                 logger.bar()
             elif(parent.startswith('minecraft:item/generated')):
+                if('textures' in j):
+                    texture = res.loadTexture(j['textures']['layer0'],size,False)
+                    cv2.imwrite(f'./generate/{item.name.replace(".json","")}.png', texture.image)
+                    i+=1
+                else:
+                    logger.print(f'Failed: not found textures {item.name} {json.dumps(j)}')
+                    fail+=1
                 logger.bar()
             else:
                 print(f'url->{item.__str__}')
+                logger.bar()
+        else:
+            logger.print(f'Failed: not found textures {item.name} {json.dumps(j)}')
+            fail+=1
+            logger.bar()
     logger.stop()
-print(f'Rendered block_item {i} block')
+print(f'Rendered block_items {b} block')
+print(f'Rendered items {i} item')
+print(f'Failed {fail}')
+print(f'total {i+b}')

@@ -38,7 +38,7 @@ def setup(size):
 
 
 res = Resource('./resource/1.18.2/assets/minecraft')
-scene = Scene(300, setup)
+scene = Scene(64, setup)
 scene.clear()
 renderTest = ['command_block', 'composter', 'furnace',
               'stonecutter', 'big_dripleaf', 'andesite_stairs', 'scaffolding_stable','purple_glazed_terracotta','acacia_trapdoor_bottom','cactus']
