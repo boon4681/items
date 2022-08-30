@@ -3,7 +3,6 @@
 import json
 import math
 from time import sleep
-from OpenGL.WGL import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *

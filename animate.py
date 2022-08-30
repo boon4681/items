@@ -23,7 +23,7 @@ def setup(size):
     glShadeModel(GL_FLAT)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    scale = 1.225
+    scale = 0.8
     focus = 5
     glOrtho(-1.0 / scale, 1.0 / scale, -1.0 / scale,
             1.0 / scale, -2.0/scale, 1.0/scale*focus)
@@ -37,14 +37,21 @@ def setup(size):
 
 
 res = Resource('./resource/1.18.2/assets/minecraft')
-scene = Scene(64, setup)
+scene = Scene(320, setup)
 scene.clear()
-renderTest = ['command_block', 'composter', 'furnace',
-              'stonecutter', 'big_dripleaf', 'andesite_stairs', 'scaffolding_stable','purple_glazed_terracotta','acacia_trapdoor_bottom','cactus']
-# renderTest = ['composter','stonecutter']
-# renderTest = ['andesite_stairs','andesite_wall_inventory','beacon']
-for test in renderTest:
+
+deg = 0
+deg2 = 0
+block = Block(scene, res, f'block/spore_blossom')
+while True:
     scene.clear()
-    block = Block(scene,res, f'block/{test}')
-    block.render()
-    cv2.imwrite(f'./test/{test}.png', scene.readScene())
+    scene.rotate_by_axis(deg,'xz')
+    scene.rotate_by_axis(deg2,'y')
+    scene.translate(0,math.sin(math.radians(deg))*0.5,0)
+    block.render(clip=False)
+    scene.popMatrix()
+    deg = (deg+7)%360
+    deg2 = (deg2+12)%360
+    cv2.imshow('HI', scene.readScene())
+    if cv2.waitKey(25) & 0xFF == ord('q'):
+        cv2.destroyAllWindows()
