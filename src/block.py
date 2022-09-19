@@ -6,7 +6,8 @@ from colorama import Style
 from src.scene import Scene
 from src.resource import Resource, Texture
 
-def uvMapper(raw_uv, face, texture: Texture,_del:bool = False):
+
+def uvMapper(raw_uv, face, texture: Texture, _del: bool = False):
     # if(face in ["south",'west'] and _del):
     #     x0,x1,y0,y1 = raw_uv
     #     raw_uv = [x0, 16 - y1, x1, 16 - y0]
@@ -35,10 +36,9 @@ def cullMapper(raw_uv, face, texture: Texture):
     uv /= (texture.width, texture.height)
     if(face == "up"):
         uv = np.roll(uv, 2)
-    if(face in ["south",'west']):
-        uv = np.roll(uv, 4)
     # print('cullMap', uv.tolist())
     return uv
+
 
 def uvRotate(uv, degree):
     rotateMap = {0: 0, 90: 1, 180: 2, 270: 3}
@@ -58,14 +58,17 @@ class Cube:
         self._from_ = _from_
         self._to_ = _to_
         if(abs(x1-x0) == 0):
-            del faces['west']
+            if('west' in faces):
+                del faces['west']
         if(abs(y1-y0) == 0):
-            del faces['down']
+            if('down' in faces):
+                del faces['down']
         if(abs(z1-z0) == 0):
-            del faces['south']
+            if('south' in faces):
+                del faces['south']
         self.faces = faces
         self.textures = textures
-        self.scene_rotation = 270
+        self.scene_rotation = 135
         self.cube = cube
         self.edges = [(0, 1), (1, 2), (2, 3), (3, 0), (4, 5),
                       (5, 4), (7, 6), (7, 4), (0, 4), (1, 5), (2, 6), (3, 7)]
@@ -75,16 +78,19 @@ class Cube:
         self.surfaces = [(0, 1, 2, 3), (5, 4, 7, 6), (4, 0, 3, 7),
                          (1, 5, 6, 2), (4, 5, 1, 0), (2, 6, 7, 3)]
 
-    def rotate(self,rotation):
+    def rotate(self, rotation):
         self.scene_rotation = abs(self.scene_rotation - rotation)
-    
+
     def rotate_scene(self):
         rot = self.cube['rotation']
-        x,y,z = (np.array(rot['origin']) / 16).tolist()
+        x, y, z = (np.array(rot['origin']) / 16).tolist()
         axis = rot['axis']
-        if(axis == 'x'): a,b,c = [1,0,0]
-        if(axis == 'y'): a,b,c = [0,1,0]
-        if(axis == 'z'): a,b,c = [0,0,1]
+        if(axis == 'x'):
+            a, b, c = [1, 0, 0]
+        if(axis == 'y'):
+            a, b, c = [0, 1, 0]
+        if(axis == 'z'):
+            a, b, c = [0, 0, 1]
 
         glMatrixMode(GL_MODELVIEW)
         glPushMatrix()
@@ -92,18 +98,20 @@ class Cube:
         glRotatef(rot["angle"], a, b, c)
         glTranslatef(-x, -y, -z)
 
-    def render(self,depth_test:bool = False,clip:bool = True):
+    def render(self, depth_test: bool = False, clip: bool = True):
         if('rotation' in self.cube):
             self.rotate_scene()
         mapping = ['north', 'south', 'west', 'east', 'down', 'up']
-        clipping = ['south','west','down']
-        if(self.scene_rotation == 270):
-            clipping = ['south','west','down']
+        clipping = ['south', 'west', 'down']
         if(self.scene_rotation == 90):
-            clipping = ['north','east','down']
-        if(not clip): clipping = []
+            clipping = ['west', 'down', 'north']
+        if(self.scene_rotation == 270):
+            clipping = ['east', 'down', 'south']
+        if(not clip):
+            clipping = []
         if(depth_test):
             glEnable(GL_DEPTH_TEST)
+            glDepthFunc(GL_LEQUAL)
         else:
             glDisable(GL_DEPTH_TEST)
         glEnable(GL_TEXTURE_2D)
@@ -117,25 +125,36 @@ class Cube:
                     face = self.faces[mapping[i]]
                     texture = self.textures[face['texture']]
                     texture.bind()
+                    f = mapping[i]
                     if('uv' in face and 'cullface' in face):
-                        uv = cullMapper(np.roll(face['uv'],2), mapping[i], texture)
+                        if(f in ['up', 'down']):
+                            uv = cullMapper(
+                                np.roll(face['uv'], 0), mapping[i], texture)
+                        else:
+                            uv = cullMapper(
+                                np.roll(face['uv'], 2), mapping[i], texture)
                     elif('uv' in face):
                         uv = uvMapper(face['uv'], mapping[i], texture)
                     else:
                         uv = uvMapper([0, 0, 16, 16], mapping[i], texture)
-                        f = mapping[i]
                         if(f == 'north'):
-                            uv = cullMapper([16 - x1, y1, 16 - x0, y0], mapping[i], texture)
+                            uv = cullMapper(
+                                [16 - x1, y1, 16 - x0, y0], mapping[i], texture)
                         if(f == 'south'):
-                            uv = cullMapper([x0, 16 - y1, x1, 16 - y0], mapping[i], texture)
+                            uv = cullMapper(
+                                [16 - x0, y1, 16 - x1, y0], mapping[i], texture)
                         if(f == 'east'):
-                            uv = cullMapper([16 - z1, y1, 16 - z0, y0], mapping[i], texture)
+                            uv = cullMapper(
+                                [16 - z1, y1, 16 - z0, y0], mapping[i], texture)
                         if(f == 'west'):
-                            uv = cullMapper([z0, 16 - y1, z1, 16 - y0], mapping[i], texture)
+                            uv = cullMapper(
+                                [16 - z0, y1, 16 - z1, y0], mapping[i], texture)
                         if(f == 'up'):
-                            uv = cullMapper([x1, z1, x0, z0], mapping[i], texture)
+                            uv = cullMapper([x1, z1, x0, z0],
+                                            mapping[i], texture)
                         if(f == 'down'):
-                            uv = uvMapper([x1, z1, x0, z0], mapping[i], texture)
+                            uv = uvMapper([x1, z1, x0, z0],
+                                          mapping[i], texture)
                         # print(f, "cullface", uv)
                     if('rotation' in face):
                         uv = uvRotate(uv, face['rotation'])
@@ -150,7 +169,7 @@ class Cube:
 
 
 class Block:
-    def __init__(self,scene: Scene, resource: Resource, source: str):
+    def __init__(self, scene: Scene, resource: Resource, source: str):
         self.cubes = []
         self.textures = {}
         self.source = source
@@ -185,9 +204,11 @@ class Block:
                                     {'#'+i: self.textures[source]})
                             else:
                                 self.textures.update(
-                                    {'#'+i: self.resource.loadTexture(source)})
+                                    {'#'+i: self.resource.glLoadTexture(source)})
                     if('elements' in model):
-                        for cube in model['elements']: self.cubes.append(Cube(cube, cube['faces'], self.textures))
+                        for cube in model['elements']:
+                            self.cubes.append(
+                                Cube(cube, cube['faces'], self.textures))
                         loadedModel = True
                     source = save
                     break
@@ -201,9 +222,11 @@ class Block:
                                 {'#'+i: self.textures[source]})
                         else:
                             self.textures.update(
-                                {'#'+i: self.resource.loadTexture(source)})
+                                {'#'+i: self.resource.glLoadTexture(source)})
                 if('elements' in model):
-                    for cube in model['elements']: self.cubes.append(Cube(cube, cube['faces'], self.textures))
+                    for cube in model['elements']:
+                        self.cubes.append(
+                            Cube(cube, cube['faces'], self.textures))
                     loadedModel = True
                 source = model['parent']
             else:
@@ -215,34 +238,36 @@ class Block:
                             self.textures.update({'#'+i: source})
                         else:
                             self.textures.update(
-                                {'#'+i: self.resource.loadTexture(source)})
+                                {'#'+i: self.resource.glLoadTexture(source)})
                 if('elements' in model):
-                    for cube in model['elements']: self.cubes.append(Cube(cube, cube['faces'], self.textures))
+                    for cube in model['elements']:
+                        self.cubes.append(
+                            Cube(cube, cube['faces'], self.textures))
                     loadedModel = True
                 # print(self.cubes,self.textures)
                 break
         model = self.resource.readModel(self.loaded_source)
-        self.rrotation = 270
+        self.irotation = 135
         if('display' in model):
             if('gui' in model['display']):
-                self.rrotation = model['display']['gui']['rotation'][1] * 2 - 180
-        # print(f"scene rotation {rotation}")
-        self.scene.rotate_by_axis(self.rrotation,'y')
+                self.irotation = model['display']['gui']['rotation'][1]*3
+        print(f'{Fore.RED}Loaded -> {Fore.LIGHTYELLOW_EX}{self.source}{Fore.RESET}')
 
-    def render(self,clip:bool = False):
+    def init(self):
+        self.scene.rotate_by_axis(135, 'y')
+        self.scene.rotate_by_axis(self.irotation, 'y')
+
+    def render(self, clip: bool = False):
         try:
-            # I don't know how to fix depth_test so i do this
             for i, cube in enumerate(self.cubes):
-                # cube.rotate(self.rrotation)
-                cube.render(clip= clip)
-            for i, cube in enumerate(self.cubes[::-1]):
-                # cube.rotate(self.rrotation)
-                cube.render(True,clip= clip)
+                cube.rotate(self.irotation)
+                cube.render(True, clip=clip)
         except:
-            # print(f' ${Fore.RED}Block Failed to rendering {self.source}{Fore.RESET}')
+            print(
+                f' ${Fore.RED}Block Failed to rendering {self.source}{Fore.RESET}')
             raise
         self.scene.popMatrix()
-        # print(f'{Fore.RED}Ended -> {Fore.LIGHTYELLOW_EX}{self.source}{Fore.RESET}')
+        self.scene.popMatrix()
 
     def clearTexture(self):
         for name in self.textures:
