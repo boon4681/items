@@ -65,7 +65,7 @@ class Resource:
         text = ':'.join(cut)
         text = text.replace('minecraft:', '')
         source = path.join(self.location, type, *Path(text+suffix).parts)
-        return source
+        return Path.resolve(source).as_posix()
 
     def readModel(self, name: str):
         fpath = self.goto('models', name)
