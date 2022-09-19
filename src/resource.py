@@ -9,17 +9,17 @@ from PIL import Image
 from cv2 import Mat
 import numpy as np
 
+from src.color import mix, to_rgb
 
 class Texture:
-    def __init__(self,source:str, image:Mat,origin) -> None:
+    def __init__(self,source:str, image:Mat) -> None:
         h, w, c = image.shape
         self.id = glGenTextures(1)
         self.name = source
         self.image = image
         self.width = w
         self.height = h
-        self.origin = origin
-        print(f' $ - {Fore.GREEN}Loading{Fore.RESET} {source} -> glTexture id {self.id}')
+        print(f'$- {Fore.GREEN}Loading{Fore.RESET} {source} -> glTexture id {self.id}')
         datas = Image.fromarray(image)
         glBindTexture(GL_TEXTURE_2D, self.id)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, datas.size[0], datas.size[1],
@@ -37,11 +37,12 @@ class Texture:
 class Resource:
     location = ''
 
-    def __init__(self, location: str) -> None:
+    def __init__(self, location: str,colors={}) -> None:
         if location.startswith('.'):
             self.location = Path(location).resolve()
         else:
             self.location = location
+        self.colors = colors
 
     def _suffix_check(self, type):
         suffix = {
@@ -52,8 +53,8 @@ class Resource:
 
     def goto(self, type: str, text: str):
         """
-        :type string
-        :text string
+        :parent string
+        :path string
         """
         suffix = self._suffix_check(type)
         cut = text.split(":")
@@ -64,7 +65,6 @@ class Resource:
         text = ':'.join(cut)
         text = text.replace('minecraft:', '')
         source = path.join(self.location, type, *Path(text+suffix).parts)
-        print(f'{Fore.LIGHTRED_EX}${source}{Fore.RESET}')
         return source
 
     def readModel(self, name: str):
@@ -74,8 +74,16 @@ class Resource:
         fs.close()
         return json.loads(data)
 
+    def glLoadTexture(self, source: str, size: int = 128,rgba:bool = True):
+        name = source.split('/')[-1]
+        image = self.loadTexture(source,size,rgba)
+        if(name in self.colors):
+            image = mix(image,to_rgb(self.colors[name]))
+        return Texture(source,image)
+        
     def loadTexture(self, source: str, size: int = 128,rgba:bool = True):
         fpath = self.goto('textures', source)
+        print(f'{Fore.LIGHTRED_EX}$ Loaded Texture: {fpath}{Fore.RESET}')
         image = cv2.imread(fpath, cv2.IMREAD_UNCHANGED)
         h, w, c = image.shape
         origin = np.array([w, h])
@@ -85,5 +93,4 @@ class Resource:
         image = cv2.resize(image, (dim[0], dim[1]),
                            interpolation=cv2.INTER_AREA)
         if(rgba): image = cv2.cvtColor(image, cv2.COLOR_BGRA2RGBA)
-        # cv2.imshow(source,image)
-        return Texture(source,image,origin)
+        return image
