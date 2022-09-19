@@ -1,4 +1,6 @@
+import json
 import math
+import requests
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
@@ -27,24 +29,25 @@ def setup(size):
     focus = 5
     glOrtho(-1.0 / scale, 1.0 / scale, -1.0 / scale,
             1.0 / scale, -2.0/scale, 1.0/scale*focus)
-    dist = math.sqrt(1 / 3.0)
-    gluLookAt(dist, dist, dist,
+    gluLookAt(1, 6**0.5/3, 1,
               0.0,  0.0,  0.0,
               0.0,  1.0,  0.0)
-    glTranslated(0, 0, 0)
+    glTranslated(0, -(6**0.58/3)*0.1, 0)
     glMatrixMode(GL_MODELVIEW)
     glViewport(0, 0, size, size)
 
-
-res = Resource('./resource/1.18.2/assets/minecraft')
-scene = Scene(64, setup)
+colors = json.loads(requests.get(f'https://raw.githubusercontent.com/boon4681/itemsflower/1.19.2/blocks.json').text)
+res = Resource('./resource/1.18.2/assets/minecraft',colors)
+scene = Scene(128, setup)
 scene.clear()
 renderTest = ['command_block', 'composter', 'furnace',
-              'stonecutter', 'big_dripleaf', 'andesite_stairs', 'scaffolding_stable','purple_glazed_terracotta','acacia_trapdoor_bottom','cactus']
+              'stonecutter', 'big_dripleaf', 'andesite_stairs', 'scaffolding_stable','purple_glazed_terracotta','acacia_trapdoor_bottom','acacia_fence_inventory','acacia_fence_gate','cactus']
 # renderTest = ['composter','stonecutter']
 # renderTest = ['andesite_stairs','andesite_wall_inventory','beacon']
+renderTest = ['andesite_stairs','andesite_wall_inventory','black_stained_glass','acacia_leaves']
 for test in renderTest:
     scene.clear()
     block = Block(scene,res, f'block/{test}')
-    block.render()
+    block.init()
+    block.render(clip=True)
     cv2.imwrite(f'./test/{test}.png', scene.readScene())
