@@ -1,0 +1,23 @@
+FROM python:3.9.13-bullseye
+
+RUN python3.9 --version
+
+RUN apt-get update; \
+    apt-get install -y freeglut3-dev libgl1-mesa-dev git xvfb xorg-dev cmake
+
+RUN mkdir /build;\ 
+    git clone https://github.com/glfw/glfw.git /build/glfw;\
+    cd /build/glfw;\
+    cmake -DBUILD_SHARED_LIBS=ON .;\
+    make;\
+    export PYGLFW_LIBRARY=/build/glfw/src/libglfw.so;
+
+
+WORKDIR /usr/local/items
+
+COPY . .
+
+RUN pip install -r requirements.txt
+RUN cd /usr/local/items
+
+CMD [ "xvfb-run","-a","python3.9","main.py","--version","latest" ]
