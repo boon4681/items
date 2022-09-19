@@ -4,7 +4,7 @@ from time import sleep
 
 
 class Logger(object):
-    def __init__(self, bar, filename="Default.log"):
+    def __init__(self, bar, filename="Default.log.yml"):
         self.terminal = sys.stdout
         self.log = open(filename, "w")
         self.antiANSI = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
@@ -14,9 +14,12 @@ class Logger(object):
 
     def write(self, message):
         message = self.antiANSI.sub('', message)
+        if(message.startswith('$')):
+            message = message.replace("$","   -")
         self.log.write(message)
 
     def print(self, message):
+        message += '\n'
         self.stop()
         print(message)
         self.write(message)

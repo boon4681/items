@@ -2,5 +2,5 @@ source
 __pycache__
 generate
 resource
-Default.log
+*.log.yml
 test
