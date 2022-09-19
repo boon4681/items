@@ -11,7 +11,8 @@ from src.resource import Resource
 def setup(size):
     glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-
+    glAlphaFunc (GL_GREATER, 0.1)
+    glEnable(GL_ALPHA_TEST)
     glEnable(GL_LIGHTING)
     glEnable(GL_LIGHT0)
     glEnable(GL_COLOR_MATERIAL)
@@ -43,15 +44,21 @@ scene.clear()
 deg = 0
 deg2 = 0
 block = Block(scene, res, f'block/spore_blossom')
+# block = Block(scene, res, f'block/big_dripleaf')
+import time
 while True:
+    start_time = time.time()
     scene.clear()
-    scene.rotate_by_axis(deg,'xz')
-    scene.rotate_by_axis(deg2,'y')
+    block.init()
+    scene.rotate_by_axis(deg2,'xz')
+    scene.rotate_by_axis(deg,'y')
     scene.translate(0,math.sin(math.radians(deg))*0.5,0)
     block.render(clip=False)
     scene.popMatrix()
-    deg = (deg+7)%360
+    scene.popMatrix()
+    deg = (deg+6)%360
     deg2 = (deg2+12)%360
     cv2.imshow('HI', scene.readScene())
+    print("FPS: ", 1.0 / (time.time() - start_time))
     if cv2.waitKey(25) & 0xFF == ord('q'):
         cv2.destroyAllWindows()
