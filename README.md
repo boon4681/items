@@ -1,7 +1,12 @@
 
+![logo](logo.png)
+
 # items
 
-Renders minecraft block models and items on python and opengl.
+> Render Minecraft blocks and items to images
+> and provided pre-rendered images too.
+
+items is a project that render Minecraft blocks and items to image through python and opengl without open the game. items provided pre-rendered images on github which is you can using it now.
 
 ![()[]](https://media.discordapp.net/attachments/558622428754870272/1013591137757433856/cactus.png)
 ![()[]](https://media.discordapp.net/attachments/558622428754870272/1013592029592293447/observer.png)
@@ -14,6 +19,7 @@ Progressing list that this project was done.
 
 - [ ] Blocks
   - [x] Block_items rendering
+  - [x] Block_items white based rendering
   - [ ] Block_entities rendering
 - [ ] Items
   - [x] resized minecraft:item/generated
@@ -22,6 +28,32 @@ Progressing list that this project was done.
 
 ## How to use
 
-```shell
-$: python main.py
+On Windows
+
+```sh
+pip install -r requirements.txt
+```
+
+```sh
+python main.py
+```
+
+On Linux ( Debian why? only `debian` cuz I'm lazy to test it on other platforms )
+
+```sh
+pip install -r requiremetns.txt
+```
+
+```sh
+apt-get install freeglut3-dev libgl1-mesa-dev git xvfb xorg-dev cmake
+mkdir /build
+git clone https://github.com/glfw/glfw.git /build/glfw
+cd /build/glfw
+cmake -DBUILD_SHARED_LIBS=ON .
+make
+export PYGLFW_LIBRARY=/build/glfw/src/libglfw.so
+```
+
+```sh
+xvfb-run -a python main.py
 ```
