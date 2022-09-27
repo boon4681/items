@@ -6,7 +6,7 @@
 > Render Minecraft blocks and items to images
 > and provided pre-rendered images too.
 
-items is a project that render Minecraft blocks and items to image through python and opengl without open the game. items provided pre-rendered images on github which is you can using it now.
+items is a project that render Minecraft blocks and items to image through python and opengl without open the game. items provided pre-rendered images on github which is you can using it but not now (cuz this project didn't finished yet).
 
 ![()[]](https://media.discordapp.net/attachments/558622428754870272/1013591137757433856/cactus.png)
 ![()[]](https://media.discordapp.net/attachments/558622428754870272/1013592029592293447/observer.png)
@@ -23,8 +23,8 @@ Progressing list that this project was done.
   - [ ] Block_entities rendering
 - [ ] Items
   - [x] resized minecraft:item/generated
-  - [ ] colorized white based items
-  - [ ] rendered template based items
+  - [x] colorized white based items
+  - [x] rendered template based items
 
 ## How to use
 
@@ -35,7 +35,7 @@ pip install -r requirements.txt
 ```
 
 ```sh
-python main.py
+python main.py --version {minecraft-version} --size {size-of-image}
 ```
 
 On Linux ( Debian why? only `debian` cuz I'm lazy to test it on other platforms )
@@ -55,5 +55,13 @@ export PYGLFW_LIBRARY=/build/glfw/src/libglfw.so
 ```
 
 ```sh
-xvfb-run -a python main.py
+xvfb-run -a python main.py --version {minecraft-version} --size {size-of-image}
 ```
+
+## Contribute?
+
+feel free to make a commit or pull request if you want to add or fix somethings.
+
+## Disclaimer
+
+Items IS NOT AN OFFICIAL MINECRAFT PRODUCT. NOT APPROVED BY OR ASSOCIATED WITH MOJANG STUDIOS.

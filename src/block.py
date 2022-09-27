@@ -179,8 +179,9 @@ class Block:
         self.rotation = []
         try:
             self.load()
-        except:
-            print(f' ${Fore.RED}Block Failed to loading {source}{Fore.RESET}')
+        except Error as e:
+            print(f'$ {Fore.RED}Block Failed to load: {self.source}{Fore.RESET}')
+            print(e)
             raise
 
     def load(self):
@@ -251,7 +252,7 @@ class Block:
         if('display' in model):
             if('gui' in model['display']):
                 self.irotation = model['display']['gui']['rotation'][1]*3
-        print(f'{Fore.RED}Loaded -> {Fore.LIGHTYELLOW_EX}{self.source}{Fore.RESET}')
+        print(f'$ {Fore.RED}Loaded: -> {Fore.LIGHTYELLOW_EX}{self.source}{Fore.RESET}')
 
     def init(self):
         self.scene.rotate_by_axis(135, 'y')
@@ -263,8 +264,7 @@ class Block:
                 cube.rotate(self.irotation)
                 cube.render(True, clip=clip)
         except:
-            print(
-                f' ${Fore.RED}Block Failed to rendering {self.source}{Fore.RESET}')
+            print(f'$ {Fore.RED}Block Failed to render: {self.source}{Fore.RESET}')
             raise
         self.scene.popMatrix()
         self.scene.popMatrix()

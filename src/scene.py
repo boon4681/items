@@ -12,6 +12,7 @@ def createContext():
     glfw.window_hint(glfw.VISIBLE,glfw.FALSE)
     hWnd = glfw.create_window(64,64,"",None,None)
     glfw.make_context_current(hWnd)
+    return glfw
 
 
 def createBuffer(size: int):
@@ -38,7 +39,7 @@ def readBuffer(size: int):
 class Scene:
     def __init__(self, size: int, setup):
         self.size = size
-        createContext()
+        self.glfw = createContext()
         createBuffer(self.size)
         setup(self.size)
 
@@ -53,6 +54,9 @@ class Scene:
         image = np.array(image)
         image = cv2.cvtColor(image, cv2.COLOR_RGBA2BGRA)
         return image
+    
+    def destroy(self):
+        self.glfw.destroy_window()
 
     def rotate_by_axis(self,deg,axis):
         v = [0,0,0]

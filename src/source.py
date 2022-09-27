@@ -14,7 +14,7 @@ class VersionPath:
         self.location = location
         self.clientJAR = location.joinpath(f'{version}.jar')
         self.resource = location.joinpath('resource')
-
+        self.note = location.joinpath('note.txt')
     def make(self):
         self.location.mkdir(parents=True, exist_ok=True)
         self.resource.mkdir(parents=True, exist_ok=True)
@@ -72,9 +72,12 @@ class Source:
 
     def extract_resource(self,version):
         location = self.make(version)
-        decompiled = False
-        if(decompiled): return
+        extracted = False
+        if(location.note.exists()):
+            with open(location.note,'r') as f: extracted = f.read().find('extracted') != -1
+        if(extracted): return
         with zipfile.ZipFile(location.clientJAR,'r') as jar:
             for file in jar.namelist():
                 if(file.startswith('assets/minecraft/models/') or file.startswith('assets/minecraft/textures/')):
                     jar.extract(file, location.resource)
+        with open(location.note,'a') as f: f.write('extracted')

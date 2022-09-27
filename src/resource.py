@@ -19,7 +19,7 @@ class Texture:
         self.image = image
         self.width = w
         self.height = h
-        print(f'$- {Fore.GREEN}Loading{Fore.RESET} {source} -> glTexture id {self.id}')
+        print(f'$ Texture: {Fore.GREEN}Loading{Fore.RESET} {source} -> glTexture id {self.id}')
         datas = Image.fromarray(image)
         glBindTexture(GL_TEXTURE_2D, self.id)
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, datas.size[0], datas.size[1],
@@ -51,12 +51,13 @@ class Resource:
         }
         return suffix[type]
 
-    def goto(self, type: str, text: str):
+    def goto(self, type: str, text: str,suffix:str = ''):
         """
         :parent string
         :path string
         """
-        suffix = self._suffix_check(type)
+        if(suffix == ''):
+            suffix = self._suffix_check(type)
         cut = text.split(":")
         if len(cut) > 1 and cut[::-1][0].startswith('minecraft:'):
             cut = cut[::-1]
@@ -83,8 +84,14 @@ class Resource:
         
     def loadTexture(self, source: str, size: int = 128,rgba:bool = True):
         fpath = self.goto('textures', source)
-        print(f'{Fore.LIGHTRED_EX}$ Loaded Texture: {fpath}{Fore.RESET}')
-        image = cv2.imread(fpath, cv2.IMREAD_UNCHANGED)
+        if(not Path(fpath).exists()):
+            print(f'{Fore.LIGHTRED_EX}$ Path Failed Texture: {fpath}{Fore.RESET}')
+        else:
+            print(f'{Fore.LIGHTRED_EX}$ Path Texture: {fpath}{Fore.RESET}')
+        return self.loadImage(fpath,size,rgba)
+
+    def loadImage(self, source: str, size: int = 128,rgba:bool = True):
+        image = cv2.imread(source, cv2.IMREAD_UNCHANGED)
         h, w, c = image.shape
         origin = np.array([w, h])
         scale = size/origin
