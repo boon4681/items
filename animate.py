@@ -3,6 +3,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import cv2
+from src.source import Source
 from src.scene import Scene
 from src.block import Block
 from src.resource import Resource
@@ -37,8 +38,9 @@ def setup(size):
     glViewport(0, 0, size, size)
 
 
-res = Resource('./resource/1.18.2/assets/minecraft')
+res = Resource('./source/1.19.2/resource/assets/minecraft')
 res.add_redirect(r'^custom','./custom/test')
+# res.add_redirect(r'^entity','{origin}')
 scene = Scene(320, setup)
 scene.clear()
 

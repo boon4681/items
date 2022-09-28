@@ -70,14 +70,15 @@ class Source:
                         f.write(chunk)
                         f.flush()
 
-    def extract_resource(self,version):
+    def extract_resource(self,version,force=False):
         location = self.make(version)
         extracted = False
         if(location.note.exists()):
             with open(location.note,'r') as f: extracted = f.read().find('extracted') != -1
-        if(extracted): return
+        print(extracted and force == False)
+        if(extracted and force == False): return
         with zipfile.ZipFile(location.clientJAR,'r') as jar:
             for file in jar.namelist():
-                if(file.startswith('assets/minecraft/models/') or file.startswith('assets/minecraft/textures/')):
+                if(file.startswith('assets/minecraft/models/') or file.startswith('assets/minecraft/textures/') or file.startswith('assets/minecraft/entity')):
                     jar.extract(file, location.resource)
         with open(location.note,'a') as f: f.write('extracted')

@@ -34,6 +34,17 @@ class Texture:
     def delete(self):
         glDeleteTextures(self.id,[self.id])
 
+class Redirect:
+    force = False
+    type = ''
+
+    def __init__(self,path,to) -> None:
+        self.path = path
+        self.to = Path(to).resolve().as_posix()
+    
+    def set_force(self,type):
+        self.force = True
+        self.type = type
 
 class Resource:
     location = ''
@@ -41,7 +52,7 @@ class Resource:
 
     def __init__(self, location: str,colors={}) -> None:
         if location.startswith('.'):
-            self.location = Path(location).resolve()
+            self.location = Path(location).resolve().as_posix()
         else:
             self.location = location
         self.colors = colors
@@ -53,12 +64,14 @@ class Resource:
         }
         return suffix[type]
 
-    def add_redirect(self,path,to):
+    def add_redirect(self,path:str,to:str):
+        to = to.replace('{origin}',self.location)
+        redirect = Redirect(path,to)
         if(self.redirect.get(path) is None):
-            self.redirect.update({path:to})
+            self.redirect.update({path:redirect})
         else:
             return f"Found {path} was declared"
-        return self
+        return redirect
 
     def goto(self, type: str, text: str,suffix:str = ''):
         """
@@ -77,7 +90,10 @@ class Resource:
         locate = self.location
         for i in self.redirect.keys():
             if(re.search(i,text) is not None):
-                locate = self.redirect.get(i)
+                redirect = self.redirect.get(i)
+                locate = redirect.to
+                if(redirect.force):
+                    type = redirect.type
                 break
         source = path.join(locate, type, *Path(text+suffix).parts)
         return Path(source).as_posix()
