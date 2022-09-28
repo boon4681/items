@@ -1,6 +1,7 @@
 import json
 import os.path as path
 from pathlib import Path
+import re
 
 from OpenGL.GL import *
 from colorama import Fore, Style
@@ -36,6 +37,7 @@ class Texture:
 
 class Resource:
     location = ''
+    redirect = dict()
 
     def __init__(self, location: str,colors={}) -> None:
         if location.startswith('.'):
@@ -51,6 +53,13 @@ class Resource:
         }
         return suffix[type]
 
+    def add_redirect(self,path,to):
+        if(self.redirect.get(path) is None):
+            self.redirect.update({path:to})
+        else:
+            return f"Found {path} was declared"
+        return self
+
     def goto(self, type: str, text: str,suffix:str = ''):
         """
         :parent string
@@ -65,7 +74,12 @@ class Resource:
             cut = cut[::-1]
         text = ':'.join(cut)
         text = text.replace('minecraft:', '')
-        source = path.join(self.location, type, *Path(text+suffix).parts)
+        locate = self.location
+        for i in self.redirect.keys():
+            if(re.search(i,text) is not None):
+                locate = self.redirect.get(i)
+                break
+        source = path.join(locate, type, *Path(text+suffix).parts)
         return Path(source).as_posix()
 
     def readModel(self, name: str):

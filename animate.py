@@ -38,12 +38,13 @@ def setup(size):
 
 
 res = Resource('./resource/1.18.2/assets/minecraft')
+res.add_redirect(r'^custom','./custom/test')
 scene = Scene(320, setup)
 scene.clear()
 
 deg = 0
 deg2 = 0
-block = Block(scene, res, f'block/spore_blossom')
+block = Block(scene, res, f'custom/algaela')
 # block = Block(scene, res, f'block/big_dripleaf')
 import time
 while True:
